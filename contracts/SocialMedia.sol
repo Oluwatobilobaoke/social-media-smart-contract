@@ -3,6 +3,8 @@ pragma solidity ^0.8.20;
 
 // import openzeppelin contracts for RBAC
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+
 import "./INFTFactory.sol";
 import "./NFT.sol";
 
@@ -11,6 +13,8 @@ error YOU_ARE_NOT_USER();
 error YOU_ARE_NOT_GROUP_OWNER();
 
 contract QuteeMedia is AccessControl {
+    using ECDSA for bytes32;
+
     INFTFactory nftFactoryInstance;
 
     // Create a new role identifier for the role
@@ -66,6 +70,10 @@ contract QuteeMedia is AccessControl {
     mapping(address => mapping(uint256 => bool)) idToUpVote;
     mapping(address => mapping(uint256 => bool)) idToDownVote;
     mapping(uint256 => mapping(uint256 => Comment)) private idToComment;
+
+    mapping(address => bool) private authenticatedUsers;
+    // Mapping to store nonces for each user (optional, for replay protection)
+    mapping(address => uint256) public nonces;
 
     // Define the role for the admin
     constructor(address defaultAdmin, address _nftFactory) {
@@ -175,7 +183,9 @@ contract QuteeMedia is AccessControl {
     }
 
     // fetch comments of a post
-    function fetchComments(uint256 postId) public view returns (Comment[] memory) {
+    function fetchComments(
+        uint256 postId
+    ) public view returns (Comment[] memory) {
         uint256 currentIndex = 0;
 
         Comment[] memory items = new Comment[](nextCommentId);
@@ -330,5 +340,47 @@ contract QuteeMedia is AccessControl {
     /// @dev Remove oneself from the admin role.
     function renounceAdmin() external virtual {
         renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function executeMetaTx(
+        address userAddress,
+        bytes memory signature,
+        bytes memory functionCall,
+        uint256 nonce
+    ) external returns (bytes memory) {
+        address signer = getSigner(userAddress, functionCall, signature, nonce);
+
+        require(signer == userAddress, "Invalid signature");
+
+        if (nonces[userAddress] != nonce) {
+            revert("Invalid nonce");
+        }
+
+        // Execute function call
+        (bool success, bytes memory data) = address(this).delegatecall(
+            functionCall
+        );
+        require(success, "Gas Less Function call failed");
+
+        // Update nonce if used
+        nonces[userAddress]++;
+
+        return data;
+    }
+
+    // Helper function to get the signer address (replace with your logic for nonce handling)
+    function getSigner(
+        address userAddress,
+        bytes memory functionCall,
+        bytes memory signature,
+        uint256 nonce
+    ) internal pure returns (address) {
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                "\x19Ethereum Signed Message:\n32",
+                keccak256(abi.encodePacked(userAddress, functionCall, nonce))
+            )
+        );
+        return hash.recover(signature);
     }
 }
