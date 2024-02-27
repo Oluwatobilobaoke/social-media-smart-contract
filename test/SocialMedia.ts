@@ -122,5 +122,32 @@ describe("SocialMedia", function () {
       expect(post[0].postId).to.equal(0);
       expect(post.length).to.equal(3);
     });
+
+    it("Should be able to create new posts and upvote", async () => {
+      const { socialMedia, addr1, addr2, addr3, addr4 } = await loadFixture(
+        deploySocialMedia
+      );
+
+      // register user
+      await socialMedia.connect(addr1).registerUser();
+      await socialMedia.connect(addr2).registerUser();
+      await socialMedia.connect(addr3).registerUser();
+      await socialMedia.connect(addr4).registerUser();
+
+      const postText = "Hello World";
+      const postImage = "https://example.com/image.jpg";
+      const postName = "My Post";
+
+      await socialMedia
+        .connect(addr1)
+        .createPost(postText, postImage, postName);
+
+      await socialMedia.connect(addr2).VotePost(0);
+      await socialMedia.connect(addr3).VotePost(0);
+      await socialMedia.connect(addr4).VotePost(0);
+
+      const post = await socialMedia.searchPost(0);
+      expect(post.upvote).to.equal(3);
+    });
   });
 });
