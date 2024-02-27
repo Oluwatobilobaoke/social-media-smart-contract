@@ -17,7 +17,7 @@ contract QuteeMedia is AccessControl {
     bytes32 constant USER_ROLE = keccak256("USER");
     event AdminRoleSet(bytes32 roleId, bytes32 adminRoleId);
 
-    uint private nextPostId;
+    uint public nextPostId;
 
     struct Post {
         uint256 postId;
@@ -64,9 +64,9 @@ contract QuteeMedia is AccessControl {
     }
 
     // register a new user
-    function registerUser(address user) external {
-        _grantRole(USER_ROLE, user);
-        emit Register(user);
+    function registerUser() external {
+        _grantRole(USER_ROLE, msg.sender);
+        emit Register(msg.sender);
     }
 
     // create a new post
@@ -253,6 +253,10 @@ contract QuteeMedia is AccessControl {
 
     /// @dev Return `true` if the account belongs to the user role.
     function isUser(address account) private view returns (bool) {
+        return hasRole(USER_ROLE, account);
+    }
+    /// @dev Return `true` if the account belongs to the user role.
+    function isUserRegistered(address account) public view returns (bool) {
         return hasRole(USER_ROLE, account);
     }
 
