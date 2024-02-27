@@ -52,10 +52,11 @@ contract QuteeMedia is AccessControl {
 
     event NewPostUpdate(uint256 postId, address postOwner, string text);
 
-    mapping(uint256 => Post) public posts;
-    mapping(uint256 => Group) public groups;
+    mapping(uint256 => Post) posts;
+    mapping(uint256 => Group) groups;
     mapping(address => uint[]) private postOf;
-    mapping(address => mapping(uint256 => bool)) public idToVote;
+    mapping(address => mapping(uint256 => bool)) idToUpVote;
+    mapping(address => mapping(uint256 => bool)) idToDownVote;
 
     // Define the role for the admin
     constructor(address defaultAdmin, address _nftFactory) {
@@ -105,16 +106,30 @@ contract QuteeMedia is AccessControl {
         // look up post
         Post storage post = posts[postId];
 
-        if (idToVote[msg.sender][postId] == false) {
+        if (idToUpVote[msg.sender][postId] == false) {
             post.upvote = post.upvote + 1;
-            idToVote[msg.sender][postId] = true;
+            idToUpVote[msg.sender][postId] = true;
         } else {
             post.upvote = post.upvote - 1;
-            idToVote[msg.sender][postId] = false;
+            idToUpVote[msg.sender][postId] = false;
         }
 
         // update post view
         post.views = post.views + 1;
+
+        emit Vote(postId, msg.sender);
+    }
+
+    function downVoteCourse(uint256 postId) external onlyUser {
+        Post storage post = posts[postId];
+
+        if (idToDownVote[msg.sender][postId] == false) {
+            post.downvote = post.downvote + 1;
+            idToDownVote[msg.sender][postId] = true;
+        } else {
+            post.downvote = post.downvote - 1;
+            idToDownVote[msg.sender][postId] = false;
+        }
 
         emit Vote(postId, msg.sender);
     }
@@ -255,6 +270,7 @@ contract QuteeMedia is AccessControl {
     function isUser(address account) private view returns (bool) {
         return hasRole(USER_ROLE, account);
     }
+
     /// @dev Return `true` if the account belongs to the user role.
     function isUserRegistered(address account) public view returns (bool) {
         return hasRole(USER_ROLE, account);
