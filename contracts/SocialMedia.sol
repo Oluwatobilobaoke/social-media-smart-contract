@@ -17,7 +17,8 @@ contract QuteeMedia is AccessControl {
     bytes32 constant USER_ROLE = keccak256("USER");
     event AdminRoleSet(bytes32 roleId, bytes32 adminRoleId);
 
-    uint public nextPostId;
+    uint nextPostId;
+    uint nextCommentId;
 
     struct Post {
         uint256 postId;
@@ -27,7 +28,7 @@ contract QuteeMedia is AccessControl {
         uint256 downvote;
         uint256 views;
         PostNFT nft;
-        uint createdAt;
+        uint256 createdAt;
     }
 
     // group struct with post and member
@@ -40,6 +41,13 @@ contract QuteeMedia is AccessControl {
         address[] memberCounts;
         uint256[] groupPosts;
         uint createdAt;
+    }
+
+    struct Comment {
+        uint256 commentId;
+        string commentword;
+        address commentOwner;
+        uint256 createdAt;
     }
 
     Group[] public allGroups;
@@ -57,6 +65,7 @@ contract QuteeMedia is AccessControl {
     mapping(address => uint[]) private postOf;
     mapping(address => mapping(uint256 => bool)) idToUpVote;
     mapping(address => mapping(uint256 => bool)) idToDownVote;
+    mapping(uint256 => mapping(uint256 => Comment)) private idToComment;
 
     // Define the role for the admin
     constructor(address defaultAdmin, address _nftFactory) {
@@ -143,6 +152,38 @@ contract QuteeMedia is AccessControl {
             uint256 currentId = i;
 
             Post storage currentItem = posts[currentId];
+            items[currentIndex] = currentItem;
+
+            currentIndex += 1;
+        }
+        return items;
+    }
+
+    // add a comment to a post
+    function addCommentToPost(
+        uint256 postId,
+        string memory comment
+    ) external onlyUser {
+        Comment memory newComment = Comment(
+            nextCommentId,
+            comment,
+            msg.sender,
+            block.timestamp
+        );
+        idToComment[postId][nextCommentId] = newComment;
+        nextCommentId++;
+    }
+
+    // fetch comments of a post
+    function fetchComments(uint256 postId) public view returns (Comment[] memory) {
+        uint256 currentIndex = 0;
+
+        Comment[] memory items = new Comment[](nextCommentId);
+
+        for (uint256 i = 0; i < nextCommentId; i++) {
+            uint256 currentId = i;
+
+            Comment storage currentItem = idToComment[postId][currentId];
             items[currentIndex] = currentItem;
 
             currentIndex += 1;

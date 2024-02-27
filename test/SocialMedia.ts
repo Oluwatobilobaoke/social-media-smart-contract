@@ -68,7 +68,8 @@ describe("SocialMedia", function () {
         .connect(addr1)
         .createPost(postText, postImage, postName);
 
-      expect(await socialMedia.nextPostId()).to.equal(1);
+      const post = await socialMedia.searchPost(0);
+      expect(post.postId).to.equal(0);
     });
 
     it("Should be able to create a new post and search for the post details", async () => {
