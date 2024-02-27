@@ -19,6 +19,6 @@ ALL FEATURES SHOULD BE IMPLEMENTED WITH SOLIDITY (NO DAPP)
 
 ## Smart Contract
 
-The smart contract is written in Solidity and is deployed on the Rinkeby testnet. The contract is verified and can be found [here](https://sepolia.etherscan.io/address/0x68c324405fC82f475D583E4ab9aae1d93a60A651#code). The contract address is `0x68c324405fC82f475D583E4ab9aae1d93a60A651`.
+The smart contract is written in Solidity and is deployed on the Rinkeby testnet. The contract is verified and can be found [here](https://sepolia.etherscan.io/address/0x30815424E049C87d5ABBB3c10C8044D04fd0e81a#code). The contract address is `0x30815424E049C87d5ABBB3c10C8044D04fd0e81a`.
 
 NFT FACTORTY CONTRACT:  0x311213bB5125aA63ef65EE42e3748d67998049B7 
