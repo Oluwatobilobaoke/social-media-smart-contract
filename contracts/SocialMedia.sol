@@ -120,7 +120,7 @@ contract QuteeMedia is AccessControl {
         emit Vote(postId, msg.sender);
     }
 
-    function downVoteCourse(uint256 postId) external onlyUser {
+    function downVotePost(uint256 postId) external onlyUser {
         Post storage post = posts[postId];
 
         if (idToDownVote[msg.sender][postId] == false) {

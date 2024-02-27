@@ -151,15 +151,16 @@ describe("SocialMedia", function () {
     });
 
     it("Should be able to create new posts and downvote", async () => {
-      const { socialMedia, addr1, addr2, addr3, addr4, addr5, addr6} = await loadFixture(
-        deploySocialMedia
-      );
+      const { socialMedia, addr1, addr2, addr3, addr4, addr5, addr6 } =
+        await loadFixture(deploySocialMedia);
 
       // register user
       await socialMedia.connect(addr1).registerUser();
       await socialMedia.connect(addr2).registerUser();
       await socialMedia.connect(addr3).registerUser();
       await socialMedia.connect(addr4).registerUser();
+      await socialMedia.connect(addr5).registerUser();
+      await socialMedia.connect(addr6).registerUser();
 
       const postText = "Hello World";
       const postImage = "https://example.com/image.jpg";
@@ -173,9 +174,8 @@ describe("SocialMedia", function () {
       await socialMedia.connect(addr3).VotePost(0);
       await socialMedia.connect(addr4).VotePost(0);
 
-      await socialMedia.connect(addr5).downVoteCourse(0);
-      await socialMedia.connect(addr6).downVoteCourse(0);
-
+      await socialMedia.connect(addr5).downVotePost(0);
+      await socialMedia.connect(addr6).downVotePost(0);
 
       const post = await socialMedia.searchPost(0);
       expect(post.downvote).to.equal(2);
