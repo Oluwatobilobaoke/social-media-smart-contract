@@ -71,7 +71,6 @@ contract QuteeMedia is AccessControl {
     mapping(address => mapping(uint256 => bool)) idToDownVote;
     mapping(uint256 => mapping(uint256 => Comment)) private idToComment;
 
-    mapping(address => bool) private authenticatedUsers;
     // Mapping to store nonces for each user (optional, for replay protection)
     mapping(address => uint256) public nonces;
 
